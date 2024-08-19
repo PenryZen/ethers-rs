@@ -1099,6 +1099,9 @@ impl<P: JsonRpcClient> Middleware for Provider<P> {
         self.subscribe([utils::serialize(&"newPendingTransactions"), utils::serialize(&true)]).await
     }
 
+
+
+
     async fn subscribe_logs<'a>(
         &'a self,
         filter: &Filter,
@@ -1122,6 +1125,31 @@ impl<P: JsonRpcClient> Middleware for Provider<P> {
         let filter = utils::serialize(filter);
         self.subscribe([logs, filter]).await.map(|mut stream| {
             stream.set_loaded_elements(loaded_logs);
+            stream
+        })
+    }
+
+    async fn subscribe_alchemy_pending_txs<'a>(
+        &'a self,
+        from_addresses: Option<Vec<String>>, // 发送地址过滤
+        to_addresses: Option<Vec<String>>, // 接收地址过滤
+        hashes_only: Option<bool>, // 是否仅订阅交易哈希
+    ) -> Result<SubscriptionStream<'a, Self::Provider, Transaction>, Self::Error>
+    where
+        <Self as Middleware>::Provider: PubsubClient,
+    {
+        // 构造订阅参数
+        let params = serde_json::json!({
+            "fromAddress": from_addresses.unwrap_or_default(), // 如果未指定，使用默认空数组
+            "toAddress": to_addresses.unwrap_or_default(), // 如果未指定，使用默认空数组
+            "hashesOnly": hashes_only.unwrap_or(false), // 默认为 false，即获取完整交易对象
+        });
+
+        let serialized_params = utils::serialize(&params);
+
+        self.subscribe([utils::serialize(&"alchemy_pendingTransactions"), serialized_params]).await.map(|mut stream| {
+            // 根据需要设置预加载的元素
+            stream.set_loaded_elements(VecDeque::new());
             stream
         })
     }

@@ -970,6 +970,22 @@ pub trait Middleware: Sync + Send + Debug {
         self.inner().subscribe_logs(filter).await.map_err(MiddlewareError::from_err)
     }
 
+    
+    async fn subscribe_alchemy_pending_txs<'a>(
+        &'a self,
+        from_addresses: Option<Vec<String>>, // 发送地址过滤
+        to_addresses: Option<Vec<String>>, // 接收地址过滤
+        hashes_only: Option<bool>, // 是否仅订阅交易哈希
+    )->Result<SubscriptionStream<'a, Self::Provider, Transaction>, Self::Error>
+    where
+        <Self as Middleware>::Provider: PubsubClient,
+    {
+        self.inner().subscribe_alchemy_pending_txs(from_addresses, to_addresses, hashes_only).await.map_err(MiddlewareError::from_err)
+    }
+
+
+
+
     /// Query the node for a [`FeeHistory`] object. This objct contains
     /// information about the EIP-1559 base fee in past blocks, as well as gas
     /// utilization within those blocks.

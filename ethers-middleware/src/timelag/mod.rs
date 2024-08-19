@@ -388,7 +388,7 @@ where
     {
         Err(TimeLagError::Unsupported)
     }
-
+ 
     async fn subscribe_logs<'a>(
         &'a self,
         _filter: &ethers_core::types::Filter,
@@ -401,4 +401,17 @@ where
     {
         Err(TimeLagError::Unsupported)
     }
+
+    async fn subscribe_alchemy_pending_txs<'a>(
+        &'a self,
+        from_addresses: Option<Vec<String>>, // 发送地址过滤
+        to_addresses: Option<Vec<String>>, // 接收地址过滤
+        hashes_only: Option<bool>, // 是否仅订阅交易哈希
+    )->Result<ethers_providers::SubscriptionStream<'a, Self::Provider, Transaction>, Self::Error>
+    where
+        Self::Provider: ethers_providers::PubsubClient,
+    {
+        Err(TimeLagError::Unsupported)
+    }
+
 }
